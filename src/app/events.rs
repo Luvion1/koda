@@ -62,6 +62,8 @@ use crate::app::state::InputMode;
 
 fn handle_input(app: &mut AppState, keycode: KeyCode) {
     let prev_key = app.last_key;
+    
+    // Reset last_key for most keys, keep it for sequential keys like 'g'
     app.last_key = Some(keycode);
 
     match app.input_mode {
@@ -71,6 +73,7 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
             KeyCode::Char('c') => {
                 app.filter_query.clear();
                 app.dirty_filter = true;
+                app.last_key = None; // Reset after action
             }
             KeyCode::Tab | KeyCode::Right => app.tabs.next(),
             KeyCode::BackTab | KeyCode::Left => app.tabs.previous(),
@@ -78,25 +81,33 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
                 app.log_view.auto_scroll = false;
                 let current = app.log_view.scroll_anim.target;
                 app.log_view.scroll_anim.set_target((current - 1.0).max(0.0));
+                app.last_key = None;
             }
             KeyCode::Down | KeyCode::Char('j') => {
                 app.log_view.auto_scroll = false;
                 let current = app.log_view.scroll_anim.target;
-                let max = app.logs.len().saturating_sub(1) as f64;
+                let max = app.filtered_logs.len().saturating_sub(1) as f64;
                 app.log_view.scroll_anim.set_target((current + 1.0).min(max));
+                app.last_key = None;
             }
             KeyCode::Char('g') => {
                 if let Some(KeyCode::Char('g')) = prev_key {
+                    // gg pressed - jump to top
                     app.log_view.auto_scroll = false;
                     app.log_view.scroll_anim.set_target(0.0);
                 }
+                // Don't reset last_key here - we want to wait for the second 'g'
             }
             KeyCode::Char('G') => {
                 app.log_view.auto_scroll = false;
-                let max = app.logs.len().saturating_sub(1) as f64;
-                app.log_view.scroll_anim.set_target(max);
+                let max = app.filtered_logs.len().saturating_sub(1) as f64;
+                app.log_view.scroll_anim.set_target(max.max(0.0));
+                app.last_key = None;
             }
-            KeyCode::End => app.log_view.auto_scroll = true,
+            KeyCode::End => {
+                app.log_view.auto_scroll = true;
+                app.last_key = None;
+            }
             KeyCode::Enter => {
                 if let Some(index) = app.log_view.state.selected() {
                     if index < app.filtered_logs.len() {
@@ -104,11 +115,17 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
                         app.input_mode = InputMode::Detail;
                     }
                 }
+                app.last_key = None;
             }
-            _ => {}
+            _ => {
+                app.last_key = None;
+            }
         },
         InputMode::Filtering => match keycode {
-            KeyCode::Enter | KeyCode::Esc => app.input_mode = InputMode::Normal,
+            KeyCode::Enter | KeyCode::Esc => {
+                app.input_mode = InputMode::Normal;
+                app.last_key = None;
+            }
             KeyCode::Char(c) => {
                 app.filter_query.push(c);
                 app.dirty_filter = true;
@@ -117,11 +134,18 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
                 app.filter_query.pop();
                 app.dirty_filter = true;
             }
-            _ => {}
+            _ => {
+                app.last_key = None;
+            }
         },
         InputMode::Detail => match keycode {
-            KeyCode::Enter | KeyCode::Esc => app.input_mode = InputMode::Normal,
-            _ => {}
+            KeyCode::Enter | KeyCode::Esc => {
+                app.input_mode = InputMode::Normal;
+                app.last_key = None;
+            }
+            _ => {
+                app.last_key = None;
+            }
         },
     }
 }

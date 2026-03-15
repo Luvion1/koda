@@ -25,7 +25,8 @@ impl LogViewComponent {
     }
 
     pub fn update_scroll(&mut self, item_count: usize, height: usize) {
-        if item_count == 0 {
+        if item_count == 0 || height == 0 {
+            self.state.select(None);
             return;
         }
 
@@ -41,6 +42,37 @@ impl LogViewComponent {
         let selected = (self.scroll_anim.current.round() as usize + height.saturating_sub(1))
             .min(item_count.saturating_sub(1));
         self.state.select(Some(selected));
+    }
+
+    fn highlight_text<'a>(text: &'a str, query: &str) -> Vec<Span<'a>> {
+        let mut spans = Vec::new();
+        if query.is_empty() {
+            spans.push(Span::raw(text));
+            return spans;
+        }
+
+        let query_lower = query.to_lowercase();
+        let text_lower = text.to_lowercase();
+
+        let mut last_idx = 0;
+        for (start, _) in text_lower.match_indices(&query_lower) {
+            if start > last_idx {
+                spans.push(Span::raw(&text[last_idx..start]));
+            }
+            let end = start + query.len();
+            spans.push(Span::styled(
+                &text[start..end],
+                Style::default()
+                    .bg(ratatui::style::Color::Yellow)
+                    .fg(ratatui::style::Color::Black),
+            ));
+            last_idx = end;
+        }
+        if last_idx < text.len() {
+            spans.push(Span::raw(&text[last_idx..]));
+        }
+
+        spans
     }
 
     pub fn render(&mut self, frame: &mut Frame, area: Rect, logs: &[LogEntry], filter: &str) {
@@ -63,31 +95,9 @@ impl LogViewComponent {
 
                 let mut spans = vec![time, level, source];
 
-                if filter.is_empty() {
-                    spans.push(Span::raw(&entry.message));
-                } else {
-                    let msg = &entry.message;
-                    let query = filter.to_lowercase();
-                    let msg_lower = msg.to_lowercase();
-
-                    let mut last_idx = 0;
-                    for (start, _) in msg_lower.match_indices(&query) {
-                        if start > last_idx {
-                            spans.push(Span::raw(&msg[last_idx..start]));
-                        }
-                        let end = start + query.len();
-                        spans.push(Span::styled(
-                            &msg[start..end],
-                            Style::default()
-                                .bg(ratatui::style::Color::Yellow)
-                                .fg(ratatui::style::Color::Black),
-                        ));
-                        last_idx = end;
-                    }
-                    if last_idx < msg.len() {
-                        spans.push(Span::raw(&msg[last_idx..]));
-                    }
-                }
+                // Highlight search term in message
+                let message_spans = Self::highlight_text(&entry.message, filter);
+                spans.extend(message_spans);
 
                 ListItem::new(Line::from(spans))
             })
