@@ -1,0 +1,21 @@
+[package]
+name = "koda"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.37", features = ["full"] }
+tokio-stream = "0.1.15"
+ratatui = "0.26"
+crossterm = "0.27"
+linemux = "0.3.0"
+regex = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+throbber-widgets-tui = "0.5"
+anyhow = "1.0"
+chrono = "0.4"
+
+[lib]
+name = "koda"
+path = "src/lib.rs"
