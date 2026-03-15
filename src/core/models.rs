@@ -2,6 +2,7 @@ use chrono::{DateTime, Local};
 use ratatui::style::Color;
 use serde::{Deserialize, Serialize};
 
+/// Represents the severity level of a log entry.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum LogLevel {
     Error,
@@ -36,12 +37,18 @@ impl LogLevel {
     }
 }
 
+/// A single parsed log entry.
 #[derive(Debug, Clone)]
 pub struct LogEntry {
+    /// The timestamp when the log was recorded.
     pub timestamp: DateTime<Local>,
+    /// The severity level.
     pub level: LogLevel,
+    /// The source file this log came from.
     pub source_file: String,
+    /// The actual log message.
     pub message: String,
+    /// The original raw line.
     pub raw: String,
 }
 

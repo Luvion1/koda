@@ -1,7 +1,14 @@
 [package]
 name = "koda"
 version = "0.1.0"
+authors = ["Sam Cheng <samcheng072@gmail.com>"]
 edition = "2021"
+description = "A modern, high-performance log tailer with a beautiful TUI"
+repository = "https://github.com/Luvion1/koda"
+license = "MIT"
+keywords = ["log", "tail", "tui", "monitoring", "terminal"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
 
 [dependencies]
 tokio = { version = "1.37", features = ["full"] }
