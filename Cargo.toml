@@ -1,5 +1,5 @@
 [package]
-name = "koda"
+name = "koda-tail"
 version = "0.1.0"
 authors = ["Sam Cheng <samcheng072@gmail.com>"]
 edition = "2021"

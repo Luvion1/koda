@@ -1,4 +1,4 @@
-# Koda 🚀
+# Koda-Tail 🚀
 
 A modern, high-performance log tailer with a beautiful Terminal User Interface (TUI), built with Rust and Ratatui.
 
@@ -19,7 +19,7 @@ A modern, high-performance log tailer with a beautiful Terminal User Interface (
 
 ### From Crates.io
 ```bash
-cargo install koda
+cargo install koda-tail
 ```
 
 ### From Source
@@ -34,7 +34,7 @@ cargo build --release
 Run Koda by passing the files you want to tail:
 
 ```bash
-koda /var/log/syslog ./app.log
+koda-tail /var/log/syslog ./app.log
 ```
 
 ### Keybindings

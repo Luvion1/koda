@@ -18,8 +18,8 @@ async fn main() -> Result<()> {
     // 1. Setup CLI args (files to tail)
     let args: Vec<String> = env::args().skip(1).collect();
     if args.is_empty() {
-        println!("Koda - A modern log tailer");
-        println!("Usage: koda <file1> <file2> ...");
+        println!("Koda-Tail - A modern log tailer");
+        println!("Usage: koda-tail <file1> <file2> ...");
         return Ok(());
     }
 
