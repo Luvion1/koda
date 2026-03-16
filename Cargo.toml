@@ -1,15 +1,22 @@
 [package]
 name = "koda-tail"
-version = "0.1.2"
+version = "0.3.0"
 authors = ["Sam Cheng <samcheng072@gmail.com>"]
 edition = "2021"
 description = "A modern, high-performance log tailer with a beautiful TUI"
 repository = "https://github.com/Luvion1/koda"
+homepage = "https://github.com/Luvion1/koda"
+documentation = "https://github.com/Luvion1/koda#readme"
 license = "MIT"
-keywords = ["log", "tail", "tui", "monitoring", "terminal"]
-categories = ["command-line-utilities", "development-tools"]
+keywords = ["log", "tail", "tui", "monitoring", "terminal", "cli", "log-viewer"]
+categories = ["command-line-utilities", "development-tools", "console"]
 readme = "README.md"
 rust-version = "1.85"
+
+[[bin]]
+name = "koda-tail"
+path = "src/main.rs"
+required-features = []
 
 [dependencies]
 tokio = { version = "1.37", features = ["full"] }
@@ -23,7 +30,16 @@ serde_json = "1.0"
 throbber-widgets-tui = "0.5"
 anyhow = "1.0"
 chrono = "0.4"
+clap = { version = "4.5", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+directories = "5.0"
+toml = "0.8"
 
 [lib]
 name = "koda"
 path = "src/lib.rs"
+
+[dev-dependencies]
+tempfile = "3.10"

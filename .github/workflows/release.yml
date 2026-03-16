@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Release ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu
+
+      - name: Build release
+        run: |
+          cargo build --release --verbose
+
+      - name: Build macOS
+        uses: dtolnay/rust-toolchain@master
+        with:
+          target: x86_64-apple-darwin
+        run: |
+          cargo build --release --verbose --target x86_64-apple-darwin
+
+      - name: Build Windows
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+        run: |
+          cargo build --release --verbose --target x86_64-pc-windows-msvc
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            target/release/koda-tail
+            target/x86_64-apple-darwin/release/koda-tail.exe
+            target/x86_64-pc-windows-msvc/release/koda-tail.exe
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

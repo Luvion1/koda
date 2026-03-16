@@ -83,7 +83,14 @@ impl LogViewComponent {
         spans
     }
 
-    pub fn render(&mut self, frame: &mut Frame, area: Rect, logs: &[LogEntry], filter: &str) {
+    pub fn render(
+        &mut self,
+        frame: &mut Frame,
+        area: Rect,
+        logs: &[LogEntry],
+        filter: &str,
+        _filter_active: bool,
+    ) {
         let items: Vec<ListItem> = logs
             .iter()
             .map(|entry| {

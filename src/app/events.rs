@@ -70,15 +70,41 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
         InputMode::Normal => match keycode {
             KeyCode::Char('q') | KeyCode::Esc => app.quit(),
             KeyCode::Char('f') => app.input_mode = InputMode::Filtering,
+            KeyCode::Char('p') => {
+                app.toggle_pause();
+                app.last_key = None;
+            }
+            KeyCode::Char('x') => {
+                app.input_mode = InputMode::Export;
+                app.last_key = None;
+            }
             KeyCode::Char('r') => {
                 app.use_regex_filter = !app.use_regex_filter;
+                app.dirty_filter = true;
+                app.last_key = None;
+            }
+            KeyCode::Char('l') => {
+                app.level_filter = match app.level_filter {
+                    None => Some(crate::core::models::LogLevel::Error),
+                    Some(crate::core::models::LogLevel::Error) => Some(crate::core::models::LogLevel::Warn),
+                    Some(crate::core::models::LogLevel::Warn) => Some(crate::core::models::LogLevel::Info),
+                    Some(crate::core::models::LogLevel::Info) => Some(crate::core::models::LogLevel::Debug),
+                    Some(crate::core::models::LogLevel::Debug) => None,
+                    _ => None,
+                };
                 app.dirty_filter = true;
                 app.last_key = None;
             }
             KeyCode::Char('c') => {
                 app.filter_query.clear();
                 app.filter_regex = None;
+                app.level_filter = None;
+                app.source_filter = None;
                 app.dirty_filter = true;
+                app.last_key = None;
+            }
+            KeyCode::Char('s') => {
+                app.cycle_source_filter();
                 app.last_key = None;
             }
             KeyCode::Tab | KeyCode::Right => app.tabs.next(),
@@ -123,6 +149,10 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
                 }
                 app.last_key = None;
             }
+            KeyCode::Char('y') => {
+                app.copy_log_to_clipboard();
+                app.last_key = None;
+            }
             _ => {
                 app.last_key = None;
             }
@@ -148,6 +178,28 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
             KeyCode::Enter | KeyCode::Esc => {
                 app.input_mode = InputMode::Normal;
                 app.last_key = None;
+            }
+            _ => {
+                app.last_key = None;
+            }
+        },
+        InputMode::Export => match keycode {
+            KeyCode::Enter => {
+                if let Err(e) = app.export_logs() {
+                    app.export_message = Some(format!("Export failed: {}", e));
+                }
+                app.last_key = None;
+            }
+            KeyCode::Esc => {
+                app.input_mode = InputMode::Normal;
+                app.export_path.clear();
+                app.last_key = None;
+            }
+            KeyCode::Char(c) => {
+                app.export_path.push(c);
+            }
+            KeyCode::Backspace => {
+                app.export_path.pop();
             }
             _ => {
                 app.last_key = None;
