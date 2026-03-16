@@ -9,7 +9,7 @@ homepage = "https://github.com/Luvion1/koda"
 documentation = "https://github.com/Luvion1/koda#readme"
 license = "MIT"
 keywords = ["log", "tail", "tui", "monitoring", "terminal"]
-categories = ["command-line-utilities", "development-tools", "console"]
+categories = ["command-line-utilities", "development-tools"]
 readme = "README.md"
 rust-version = "1.85"
 
