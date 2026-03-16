@@ -5,6 +5,12 @@ pub struct SpinnerComponent {
     pub state: ThrobberState,
 }
 
+impl Default for SpinnerComponent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SpinnerComponent {
     pub fn new() -> Self {
         Self {

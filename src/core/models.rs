@@ -1,9 +1,7 @@
 use chrono::{DateTime, Local};
 use ratatui::style::Color;
-use serde::{Deserialize, Serialize};
 
-/// Represents the severity level of a log entry.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LogLevel {
     Error,
     Warn,

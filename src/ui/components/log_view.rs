@@ -15,6 +15,12 @@ pub struct LogViewComponent {
     pub scroll_anim: AnimatedValue,
 }
 
+impl Default for LogViewComponent {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LogViewComponent {
     pub fn new() -> Self {
         Self {
@@ -25,22 +31,24 @@ impl LogViewComponent {
     }
 
     pub fn update_scroll(&mut self, item_count: usize, height: usize) {
-        if item_count == 0 || height == 0 {
+        if item_count == 0 {
             self.state.select(None);
             return;
         }
 
+        if height == 0 {
+            return;
+        }
+
         if self.auto_scroll {
-            // Target the last item
             let max_scroll = item_count.saturating_sub(height);
             self.scroll_anim.set_target(max_scroll as f64);
         }
 
-        // Animate towards target
-        self.scroll_anim.update(0.1); // Speed factor
+        self.scroll_anim.update(0.15);
 
-        let selected = (self.scroll_anim.current.round() as usize + height.saturating_sub(1))
-            .min(item_count.saturating_sub(1));
+        let scroll_pos = self.scroll_anim.current.round() as usize;
+        let selected = scroll_pos.min(item_count.saturating_sub(1));
         self.state.select(Some(selected));
     }
 

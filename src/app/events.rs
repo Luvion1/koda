@@ -70,10 +70,16 @@ fn handle_input(app: &mut AppState, keycode: KeyCode) {
         InputMode::Normal => match keycode {
             KeyCode::Char('q') | KeyCode::Esc => app.quit(),
             KeyCode::Char('f') => app.input_mode = InputMode::Filtering,
+            KeyCode::Char('r') => {
+                app.use_regex_filter = !app.use_regex_filter;
+                app.dirty_filter = true;
+                app.last_key = None;
+            }
             KeyCode::Char('c') => {
                 app.filter_query.clear();
+                app.filter_regex = None;
                 app.dirty_filter = true;
-                app.last_key = None; // Reset after action
+                app.last_key = None;
             }
             KeyCode::Tab | KeyCode::Right => app.tabs.next(),
             KeyCode::BackTab | KeyCode::Left => app.tabs.previous(),

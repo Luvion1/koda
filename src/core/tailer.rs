@@ -27,35 +27,49 @@ impl TailManager {
         tx: mpsc::UnboundedSender<LogEntry>,
     ) -> anyhow::Result<()> {
         let mut lines = MuxedLines::new()?;
+        let mut valid_file_count = 0;
         
         for file in &files {
             let path = Path::new(file);
             if !path.exists() {
                 eprintln!("Warning: File not found: {}", file);
-                // Try to create an empty entry to notify user
                 let entry = LogEntry::new(file.to_string(), format!("[ERROR] File not found: {}", file));
                 let _ = tx.send(entry);
                 continue;
             }
-            if let Err(e) = lines.add_file(file).await {
-                eprintln!("Warning: Failed to tail file '{}': {}", file, e);
-                let entry = LogEntry::new(file.to_string(), format!("[ERROR] Failed to tail: {}", e));
-                let _ = tx.send(entry);
-                continue;
+            match lines.add_file(file).await {
+                Ok(_) => valid_file_count += 1,
+                Err(e) => {
+                    eprintln!("Warning: Failed to tail file '{}': {}", file, e);
+                    let entry = LogEntry::new(file.to_string(), format!("[ERROR] Failed to tail: {}", e));
+                    let _ = tx.send(entry);
+                }
             }
         }
 
-        // If no files were successfully added, warn the user
-        if files.is_empty() {
+        if valid_file_count == 0 {
             eprintln!("Error: No valid files to tail.");
+            let entry = LogEntry::new(String::new(), "[ERROR] No valid files to tail. Exiting.".to_string());
+            let _ = tx.send(entry);
             return Ok(());
         }
 
-        while let Ok(Some(line)) = lines.next_line().await {
-            let source = line.source().display().to_string();
-            let entry = self.parser.parse(&source, line.line());
-            if tx.send(entry).is_err() {
-                break; // Receiver dropped
+        loop {
+            match lines.next_line().await {
+                Ok(Some(line)) => {
+                    let source = line.source().display().to_string();
+                    let entry = self.parser.parse(&source, line.line());
+                    if tx.send(entry).is_err() {
+                        break;
+                    }
+                }
+                Ok(None) => {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                }
+                Err(e) => {
+                    eprintln!("Error reading from file: {}", e);
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                }
             }
         }
 
