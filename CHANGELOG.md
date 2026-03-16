@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1] - 2024
+## [0.1.2] - 2024
 
 ### Added
 - **Regex Filter Support**: Toggle between text and regex filtering with `r` key
